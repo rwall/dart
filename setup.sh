@@ -3,9 +3,10 @@
 USER_BASE=/opt/dart
 MEDIA_BASE=/media/storage
 GIT_BASE=/tmp/dart
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
-VPN_USER=
-VPN_PASS=
+VPN_USER=a
+VPN_PASS=p
 
 IP=AUTO
 SUBNET=AUTO
@@ -52,8 +53,13 @@ echo "Installing required packages..."
 apt-get install -y mono-devel vim git openvpn sabnzbdplus python-sabyenc transmission-daemon 2>&1 >/dev/null
 echo "    done."
 
-echo "Fetching files"
-git clone https://github.com/rwall/dart ${GIT_BASE} >/dev/null 2>&1 || (echo "    Repo already checked out. updating..." && cd ${GIT_BASE} && git pull)
+if [ -d $SCRIPT_DIR/.git ] && [ -d $SCRIPT_DIR/files ]; then
+	echo "Found local repo, using it: $SCRIPT_DIR"
+	GIT_BASE=$SCRIPT_DIR
+else
+	echo "Fetching files"
+	git clone https://github.com/rwall/dart ${GIT_BASE} >/dev/null 2>&1 || (echo "    Repo already checked out. updating..." && cd ${GIT_BASE} && git pull)
+fi
 
 echo "Making directories"
 mkdir -p ${USER_BASE} 
