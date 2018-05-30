@@ -1,0 +1,14 @@
+[Unit]
+Description=Sonarr Daemon
+After=network.target
+
+[Service]
+User=sonarr
+Group=users
+Type=simple
+ExecStart=/usr/bin/mono /opt/NzbDrone/NzbDrone.exe
+TimeoutStopSec=20
+KillMode=process
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
