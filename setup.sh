@@ -4,6 +4,8 @@ USER_BASE=/opt/dart
 MEDIA_BASE=/media/storage
 GIT_BASE=/tmp/dart
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+LIDARR_PKG_URL='https://ci.appveyor.com/api/buildjobs/pqte2q546889w0yh/artifacts/Lidarr.develop.0.3.0.430.linux.tar.gz'
+LIDARR_SAVEFILE='/tmp/lidarr.tgz'
 
 VPN_USER=a
 VPN_PASS=p
@@ -112,6 +114,46 @@ $(export FILE='etc/openvpn/ipredator_dns_down.sh'; cp ${GIT_BASE}/files/$FILE /$
 $(export FILE='etc/openvpn/config/IPredator.se.ca.crt'; cp ${GIT_BASE}/files/$FILE /$FILE)
 $(export FILE='etc/openvpn/config/IPredator.se.ta.key'; cp ${GIT_BASE}/files/$FILE /$FILE)
 
+echo "Setting up software"
+echo "    SabNZB"
+USERNAME=sabnzb
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+sed -i -e 's/^USER=/USER=sabnzb/' /etc/default/sabnzbdplus
 
+echo "    Transmission"
+USERNAME=transmission
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+cp -r /var/lib/transmission-daemon/.config ${USER_BASE}/${USERNAME}/
+chown -R ${USERNAME}: ${USER_BASE}/${USERNAME}/.config
+ln -s ${USER_BASE}/${USERNAME}/.config/transmission-daemon ${USER_BASE}/${USERNAME}/info
+chown root:users /etc/transmission-daemon
+chown ${USERNAME}:users /etc/transmission-daemon/*
+sed -i -e "s#^CONFIG_DIR=.*#CONFIG_DIR=\"${USER_BASE}/${USERNAME}/info\"#" /etc/default/transmission-daemon
+sed -i -e "s/^setuid debian-transmission/setuid ${USERNAME}/" /etc/init/transmission-daemon.conf
+sed -i -e 's/^setgid debian-transmission/setgid users/' /etc/init/transmission-daemon.conf
+sed -i -e 's/"download-dir":.*/"download-dir": "\/media\/storage\/incoming\/transmission\/complete",/' /etc/transmission-daemon/settings.json
+sed -i -e 's/"incomplete-dir":.*/"incomplete-dir": "\/media\/storage\/incoming\/transmission\/incomplete",/' /etc/transmission-daemon/settings.json
+sed -i -e 's/"incomplete-dir-enabled":.*/"incomplete-dir-enabled": true,/' /etc/transmission-daemon/settings.json
+#sed -i -e 's/"rpc-host-whitelist":.*/"rpc-host-whitelist": "127.0.0.1",/' /etc/transmission-daemon/settings.json
+
+echo "    Sonarr"
+USERNAME=sonarr
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+$(export FILE='etc/systemd/system/sonarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
+systemctl enable sonarr.service
+
+echo "    Lidarr"
+USERNAME=lidarr
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+if [ -e ${LIDARR_SAVEFILE} ]; then
+	echo "      found cached tarball"
+else
+	echo "      downloading tarball"
+	wget -O "${LIDARR_SAVEFILE}" "${LIDARR_PKG_URL}" >/dev/null 2>&1
+fi
+tar -xzf ${LIDARR_SAVEFILE} --directory ${USER_BASE}/${USERNAME}/
+chown -R lidarr: ${USER_BASE}/${USERNAME}/Lidarr
+$(export FILE='etc/systemd/system/lidarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
+systemctl enable lidarr.service
 
 echo "Done."
