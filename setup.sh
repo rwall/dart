@@ -6,6 +6,7 @@ GIT_BASE=/tmp/dart
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 LIDARR_PKG_URL='https://ci.appveyor.com/api/buildjobs/pqte2q546889w0yh/artifacts/Lidarr.develop.0.3.0.430.linux.tar.gz'
 LIDARR_SAVEFILE='/tmp/lidarr.tgz'
+COUCHPOTATO_GIT_REPO='https://github.com/CouchPotato/CouchPotatoServer.git'
 
 VPN_USER=
 VPN_PASS=
@@ -162,5 +163,14 @@ tar -xzf ${LIDARR_SAVEFILE} --directory ${USER_BASE}/${USERNAME}/
 chown -R lidarr: ${USER_BASE}/${USERNAME}/Lidarr
 $(export FILE='etc/systemd/system/lidarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
 systemctl enable lidarr.service
+
+echo "     CouchPotato"
+USERNAME=couchpotato
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+git clone ${COUCHPOTATO_GIT_REPO} ${USER_BASE}/${USERNAME}/CouchPotatoServer
+$(export FILE='etc/systemd/system/couchpotato.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
+systemctl enable couchpotato.service
+
+
 
 echo "Done."
