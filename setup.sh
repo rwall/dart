@@ -46,6 +46,7 @@ if [ -z "$VPN_USER" ]; then
 fi
 if [ -z "$VPN_PASS" ]; then
 	read -p "VPN password: " -s VPN_PASS
+	echo
 fi
 
 echo "Adding repositories"
@@ -125,15 +126,15 @@ $(export FILE='etc/openvpn/config/IPredator.se.ta.key'; cp ${GIT_BASE}/files/$FI
 echo "Setting up software"
 echo "    SabNZB"
 USERNAME=sabnzb
-useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
-sed -i -e 's/^USER=/USER=sabnzb/' /etc/default/sabnzbdplus
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
+sed -i -e 's/^USER=.*/USER=sabnzb/' /etc/default/sabnzbdplus
 
 echo "    Transmission"
 USERNAME=transmission
-useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
 cp -r /var/lib/transmission-daemon/.config ${USER_BASE}/${USERNAME}/
 chown -R ${USERNAME}: ${USER_BASE}/${USERNAME}/.config
-ln -s ${USER_BASE}/${USERNAME}/.config/transmission-daemon ${USER_BASE}/${USERNAME}/info
+ln -s ${USER_BASE}/${USERNAME}/.config/transmission-daemon ${USER_BASE}/${USERNAME}/info >/dev/null 2>&1
 chown root:users /etc/transmission-daemon
 chown ${USERNAME}:users /etc/transmission-daemon/*
 sed -i -e "s#^CONFIG_DIR=.*#CONFIG_DIR=\"${USER_BASE}/${USERNAME}/info\"#" /etc/default/transmission-daemon
@@ -146,31 +147,31 @@ sed -i -e 's/"incomplete-dir-enabled":.*/"incomplete-dir-enabled": true,/' /etc/
 
 echo "    Sonarr"
 USERNAME=sonarr
-useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
-$(export FILE='etc/systemd/system/sonarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
-systemctl enable sonarr.service
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
+$(export FILE='etc/systemd/system/sonarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+systemctl enable sonarr.service >/dev/null 2>&1
 
 echo "    Lidarr"
 USERNAME=lidarr
-useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
-if [ -e ${LIDARR_SAVEFILE} ]; then
-	echo "      found cached tarball"
-else
-	echo "      downloading tarball"
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
+if [ ! -e ${LIDARR_SAVEFILE} ]; then
 	wget -O "${LIDARR_SAVEFILE}" "${LIDARR_PKG_URL}" >/dev/null 2>&1
 fi
-tar -xzf ${LIDARR_SAVEFILE} --directory ${USER_BASE}/${USERNAME}/
-chown -R lidarr: ${USER_BASE}/${USERNAME}/Lidarr
-$(export FILE='etc/systemd/system/lidarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
-systemctl enable lidarr.service
+tar -xzf ${LIDARR_SAVEFILE} --directory ${USER_BASE}/${USERNAME}/ >/dev/null 2>&1
+chown -R lidarr: ${USER_BASE}/${USERNAME}/Lidarr >/dev/null 2>&1
+$(export FILE='etc/systemd/system/lidarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+systemctl enable lidarr.service >/dev/null 2>&1
 
-echo "     CouchPotato"
+echo "    CouchPotato"
 USERNAME=couchpotato
-useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME
-git clone ${COUCHPOTATO_GIT_REPO} ${USER_BASE}/${USERNAME}/CouchPotatoServer
-$(export FILE='etc/systemd/system/couchpotato.service'; cp ${GIT_BASE}/files/$FILE /$FILE)
-systemctl enable couchpotato.service
+useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
+git clone ${COUCHPOTATO_GIT_REPO} ${USER_BASE}/${USERNAME}/CouchPotatoServer >/dev/null 2>&1
+$(export FILE='etc/systemd/system/couchpotato.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+systemctl enable couchpotato.service >/dev/null 2>&1
 
-
+systemctl daemon-reload >/dev/null 2>&1
+service start sabnzb
+systemctl start sonarr
+systemctl start lidarr
 
 echo "Done."
