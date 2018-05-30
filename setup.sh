@@ -15,6 +15,13 @@ SUBNET=AUTO
 # comment this out if you don't have additional subnets to set
 ADTL_SUBNET='10.10.20.0/24'
 
+# Make sure it's run as root
+if [[ $UID -ne 0 ]]; then
+	echo "This script must be run as root" 1>&2
+	echo "try: sudo $0" 1>&2
+	exit 1
+fi
+
 if [ "$IP" = "AUTO" ]; then
 	IP=$(ip r g 8.8.8.8 | head -n 1 | cut -d " " -f 7)
 	echo "Auto-detected IP: $IP"
