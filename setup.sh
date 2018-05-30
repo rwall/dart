@@ -7,8 +7,8 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 LIDARR_PKG_URL='https://ci.appveyor.com/api/buildjobs/pqte2q546889w0yh/artifacts/Lidarr.develop.0.3.0.430.linux.tar.gz'
 LIDARR_SAVEFILE='/tmp/lidarr.tgz'
 
-VPN_USER=a
-VPN_PASS=p
+VPN_USER=
+VPN_PASS=
 
 IP=AUTO
 SUBNET=AUTO
