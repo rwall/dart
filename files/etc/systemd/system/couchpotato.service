@@ -1,0 +1,14 @@
+[Unit]
+Description=Couch Potato Daemon
+After=network.target
+
+[Service]
+User=couchpotato
+Group=users
+Type=simple
+ExecStart=/usr/bin/python /opt/dart/couchpotato/CouchPotatoServer/CouchPotato/py
+TimeoutStopSec=20
+KillMode=process
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
