@@ -128,7 +128,10 @@ echo "    SabNZB"
 USERNAME=sabnzb
 useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
 $(export FILE='etc/systemd/system/sabnzb.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+sed -i -e "s/host =.*/host = ${IP}/" ${USER_BASE}/sabnzb/.sabnzbd/sabnzbd.ini
 systemctl enable sabnzb.service >/dev/null 2>&1
+SAB_API_KEY=$(grep -E '^api_key = ' ${USER_BASE}/sabnzb/.sabnzbd/sabnzbd.ini | cut -d " " -f 3)
+echo "api key: $SAB_API_KEY"
 
 echo "    Transmission"
 USERNAME=transmission
@@ -161,6 +164,9 @@ fi
 tar -xzf ${LIDARR_SAVEFILE} --directory ${USER_BASE}/${USERNAME}/ >/dev/null 2>&1
 chown -R lidarr: ${USER_BASE}/${USERNAME}/Lidarr >/dev/null 2>&1
 $(export FILE='etc/systemd/system/lidarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+sed -i -e "s#<BindAddress>.*</BindAddress>#<BindAddress>${IP}</BindAddress>#" ${USER_BASE}/${USERNAME}/.config/Lidarr/config.xml
+LIDARR_API_KEY=$(grep -e "ApiKey" ${USER_BASE}/lidarr/.config/Lidarr/config.xml | cut -d ">" -f 2 | cut -d "<" -f 1)
+echo "lidarr api key: $LIDARR_API_KEY"
 systemctl enable lidarr.service >/dev/null 2>&1
 
 echo "    CouchPotato"
