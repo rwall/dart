@@ -61,7 +61,7 @@ echo "Updating APT and upgrading packages"
 apt-get update 2>&1 >/dev/null && apt-get dist-upgrade -y 2>&1 >/dev/null
 
 echo "Installing required packages..."
-apt-get install -y mono-devel vim git openvpn sabnzbdplus python-sabyenc transmission-daemon 2>&1 >/dev/null
+apt-get install -y mono-devel vim git openvpn sabnzbdplus python-sabyenc transmission-daemon nzbdrone 2>&1 >/dev/null
 echo "    done."
 
 if [ -d $SCRIPT_DIR/.git ] && [ -d $SCRIPT_DIR/files ]; then
@@ -148,6 +148,7 @@ sed -i -e 's/"download-dir":.*/"download-dir": "\/media\/storage\/incoming\/tran
 sed -i -e 's/"incomplete-dir":.*/"incomplete-dir": "\/media\/storage\/incoming\/transmission\/incomplete",/' /etc/transmission-daemon/settings.json
 sed -i -e 's/"incomplete-dir-enabled":.*/"incomplete-dir-enabled": true,/' /etc/transmission-daemon/settings.json
 sed -i -e "s/\"rpc-bind-address\":.*/\"rpc-bind-address\": \"${IP}\",/" /etc/transmission-daemon/settings.json
+sed -i -e "s/\"rpc-authentication-required\":.*/\"rpc-authentication-required\": false,/" /etc/transmission-daemon/settings.json
 #sed -i -e 's/"rpc-host-whitelist":.*/"rpc-host-whitelist": "127.0.0.1",/' /etc/transmission-daemon/settings.json
 sed -i -e "s/User=.*/User=${USERNAME}/" /lib/systemd/system/transmission-daemon.service
 
@@ -155,6 +156,10 @@ echo "    Sonarr"
 USERNAME=sonarr
 useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
 $(export FILE='etc/systemd/system/sonarr.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+sed -i -e "s#<BindAddress>.*</BindAddress>#<BindAddress>${IP}</BindAddress>#" ${USER_BASE}/${USERNAME}/.config/NzbDrone/config.xml
+SONARR_API_KEY=$(grep -e "ApiKey" ${USER_BASE}/${USERNAME}/.config/NzbDrone/config.xml | cut -d ">" -f 2 | cut -d "<" -f 1)
+echo "sonarr api key: $SONARR_API_KEY"
+
 systemctl enable sonarr.service >/dev/null 2>&1
 
 echo "    Lidarr"
@@ -178,9 +183,9 @@ git clone ${COUCHPOTATO_GIT_REPO} ${USER_BASE}/${USERNAME}/CouchPotatoServer >/d
 $(export FILE='etc/systemd/system/couchpotato.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
 systemctl enable couchpotato.service >/dev/null 2>&1
 
-systemctl start sabnzb >/dev/null 2>&1
-# TODO transmission
-systemctl start sonarr >/dev/null 2>&1
-systemctl start lidarr >/dev/null 2>&1
-systemctl start couchpotato >/dev/null 2>&1
+systemctl start sabnzb			>/dev/null 2>&1
+systemctl start transmission-daemon	>/dev/null 2<&1
+systemctl start sonarr			>/dev/null 2>&1
+systemctl start lidarr			>/dev/null 2>&1
+systemctl start couchpotato		>/dev/null 2>&1
 echo "Done."
