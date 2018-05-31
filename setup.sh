@@ -147,7 +147,9 @@ sed -i -e 's/^setgid debian-transmission/setgid users/' /etc/init/transmission-d
 sed -i -e 's/"download-dir":.*/"download-dir": "\/media\/storage\/incoming\/transmission\/complete",/' /etc/transmission-daemon/settings.json
 sed -i -e 's/"incomplete-dir":.*/"incomplete-dir": "\/media\/storage\/incoming\/transmission\/incomplete",/' /etc/transmission-daemon/settings.json
 sed -i -e 's/"incomplete-dir-enabled":.*/"incomplete-dir-enabled": true,/' /etc/transmission-daemon/settings.json
+sed -i -e "s/\"rpc-bind-address\":.*/\"rpc-bind-address\": \"${IP}\",/" /etc/transmission-daemon/settings.json
 #sed -i -e 's/"rpc-host-whitelist":.*/"rpc-host-whitelist": "127.0.0.1",/' /etc/transmission-daemon/settings.json
+sed -i -e "s/User=.*/User=${USERNAME}/" /lib/systemd/system/transmission-daemon.service
 
 echo "    Sonarr"
 USERNAME=sonarr
