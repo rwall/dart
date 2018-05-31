@@ -1,0 +1,14 @@
+[Unit]
+Description=SabNZBPlus Daemon
+After=network.target
+
+[Service]
+User=sabnzb
+Group=users
+Type=simple
+ExecStart=/usr/bin/sabnzbdplus --daemon
+TimeoutStopSec=20
+KillMode=process
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

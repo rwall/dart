@@ -127,7 +127,8 @@ echo "Setting up software"
 echo "    SabNZB"
 USERNAME=sabnzb
 useradd -r -d ${USER_BASE}/$USERNAME -m -N $USERNAME >/dev/null 2>&1
-sed -i -e 's/^USER=.*/USER=sabnzb/' /etc/default/sabnzbdplus
+$(export FILE='etc/systemd/system/sabnzb.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
+systemctl enable sabnzb.service >/dev/null 2>&1
 
 echo "    Transmission"
 USERNAME=transmission
@@ -169,9 +170,9 @@ git clone ${COUCHPOTATO_GIT_REPO} ${USER_BASE}/${USERNAME}/CouchPotatoServer >/d
 $(export FILE='etc/systemd/system/couchpotato.service'; cp ${GIT_BASE}/files/$FILE /$FILE) >/dev/null 2>&1
 systemctl enable couchpotato.service >/dev/null 2>&1
 
-systemctl daemon-reload >/dev/null 2>&1
-service start sabnzb
-systemctl start sonarr
-systemctl start lidarr
-
+systemctl start sabnzb >/dev/null 2>&1
+# TODO transmission
+systemctl start sonarr >/dev/null 2>&1
+systemctl start lidarr >/dev/null 2>&1
+systemctl start couchpotato >/dev/null 2>&1
 echo "Done."
