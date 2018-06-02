@@ -49,6 +49,11 @@ if [ -z "$VPN_PASS" ]; then
 	echo
 fi
 
+echo "Disabling systemd-resolve"
+systemctl disable --now systemd-resolved.service
+rm /etc/resolv.conf
+cp /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
 echo "Adding repositories"
 echo "    Mono"
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF >/dev/null 2>&1
@@ -120,8 +125,7 @@ mkdir -p /etc/openvpn/config >/dev/null 2>&1
 $(export FILE='etc/openvpn/ipredator.conf'; cp ${GIT_BASE}/files/$FILE /$FILE)
 $(export FILE='etc/openvpn/ipredator_dns_up.sh'; cp ${GIT_BASE}/files/$FILE /$FILE)
 $(export FILE='etc/openvpn/ipredator_dns_down.sh'; cp ${GIT_BASE}/files/$FILE /$FILE)
-$(export FILE='etc/openvpn/config/IPredator.se.ca.crt'; cp ${GIT_BASE}/files/$FILE /$FILE)
-$(export FILE='etc/openvpn/config/IPredator.se.ta.key'; cp ${GIT_BASE}/files/$FILE /$FILE)
+chmod +x /etc/openvpn/ipredator_dns_{up,down}.sh
 
 echo "Setting up software"
 echo "    SabNZB"
