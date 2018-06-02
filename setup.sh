@@ -77,6 +77,8 @@ else
 	git clone https://github.com/rwall/dart ${GIT_BASE} >/dev/null 2>&1 || (echo "    Repo already checked out. updating..." && cd ${GIT_BASE} && git pull)
 fi
 
+git -C "$GIT_BASE" pull
+
 echo "Making directories"
 mkdir -p ${USER_BASE} 
 mkdir -p ${MEDIA_BASE}/incoming/transmission/complete
