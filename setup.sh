@@ -70,8 +70,8 @@ echo "Updating APT and upgrading packages"
 apt-get update 2>&1 >/dev/null && apt-get dist-upgrade -y 2>&1 >/dev/null
 
 echo "Installing required packages..."
-echo iptables-persistent iptables-persistent/autosave_v4 boolean true  | sudo debconf-set-selections
-echo iptables-persistent iptables-persistent/autosave_v6 boolean false | sudo debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true  | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean false | debconf-set-selections
 apt-get install -y iptables-persistent mono-devel vim git openvpn sabnzbdplus python-sabyenc transmission-daemon nzbdrone 2>&1 >/dev/null
 echo "    done."
 
