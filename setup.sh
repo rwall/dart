@@ -48,11 +48,15 @@ if [ -z "$VPN_PASS" ]; then
 	read -p "VPN password: " -s VPN_PASS
 	echo
 fi
-
-echo "Disabling systemd-resolve"
-systemctl disable --now systemd-resolved.service
-rm /etc/resolv.conf
-cp /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+if [ -L /etc/resolv.conf ]; then
+    echo "Disabling systemd-resolve"
+    systemd-resolve --status | grep "DNS Servers" | sed -e 's/^\s\+//g' -e "s/DNS Servers:/nameserver/" > /etc/resolv.conf.tmp
+    systemctl disable --now systemd-resolved.service
+    rm /etc/resolv.conf
+    cp /etc/resolv.conf.tmp /etc/resolv.conf
+else
+    echo "Did not detect systemd-resolve. that's good"
+fi
 
 echo "Adding repositories"
 echo "    Mono"
@@ -66,6 +70,8 @@ echo "Updating APT and upgrading packages"
 apt-get update 2>&1 >/dev/null && apt-get dist-upgrade -y 2>&1 >/dev/null
 
 echo "Installing required packages..."
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true  | sudo debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean false | sudo debconf-set-selections
 apt-get install -y iptables-persistent mono-devel vim git openvpn sabnzbdplus python-sabyenc transmission-daemon nzbdrone 2>&1 >/dev/null
 echo "    done."
 
