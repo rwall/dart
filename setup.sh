@@ -23,7 +23,7 @@ if [[ $UID -ne 0 ]]; then
 	exit 1
 fi
 
-if [[ ! -z $IPV6_BYPASS ]] || ( ip a s | grep inet6 2>&1 >/dev/null ); then
+if [[ -z $IPV6_BYPASS ]] && ( ip a s | grep inet6 2>&1 >/dev/null ); then
     cat << EOF 1>&2
 =================================
 =================================
