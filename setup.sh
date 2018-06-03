@@ -23,6 +23,20 @@ if [[ $UID -ne 0 ]]; then
 	exit 1
 fi
 
+if [[ ! -z $IPV6_BYPASS ]] || ( ip a s | grep inet6 2>&1 >/dev/null ); then
+    cat << EOF 1>&2
+=================================
+=================================
+==       IPV6 DETECTED         ==
+==   PLEASE DISABLE IPV6 AND   ==
+==     RE-RUN THIS SCRIPT      ==
+=================================
+=================================
+EOF
+    exit
+fi
+
+
 if [ "$IP" = "AUTO" ]; then
 	IP=$(ip r g 8.8.8.8 | head -n 1 | cut -d " " -f 7)
 	echo "Auto-detected IP: $IP"
